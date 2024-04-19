@@ -43,17 +43,14 @@ export class AppWorkflow {
 			const decodedList: HiddenServiceIdentifier[] = this.dockerContainer.decodeScanToHiddenServiceIdentifier(list);
 
 			// Check if list has not been updated
-			if (this.prevDecodedList == decodedList) {
-				this.logger.log(`Valid container list NOT updated. Entries: ${decodedList.length}`);
+			if (JSON.stringify(this.prevDecodedList) == JSON.stringify(decodedList)) {
+				this.logger.log(`Validated container list NOT updated. Entries: ${decodedList.length}`);
 				this.running = false;
 				return;
 			} else {
-				this.logger.log(`Valid container list updated. Entries: ${decodedList.length}`);
+				this.logger.log(`Validated container list updated. Entries: ${decodedList.length}`);
 				this.prevDecodedList = decodedList;
 			}
-
-			// Network start, dep. on namespace
-			const responseNetworkStart = await this.dockerNetwork.start();
 
 			// Write rules
 			const responseTorWriteRules = await this.torControl.writeRules(decodedList);

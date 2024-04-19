@@ -1,13 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Docker } from './docker.client.service';
 import { exec } from 'child_process';
 import { HiddenServiceIdentifier } from './app.types';
 
 @Injectable()
 export class TorControl {
 	private readonly logger = new Logger(this.constructor.name);
-
-	constructor(private docker: Docker) {}
+	constructor() {}
 
 	/**
 	 *
@@ -16,7 +14,12 @@ export class TorControl {
 	 * @returns false: failed execution
 	 */
 	async init(): Promise<boolean> {
+		// get current state
 		const running = await this.isRunning();
+		// display state
+		if (running) this.logger.log('Systemctl state <running> for tor.service.');
+		else this.logger.log('Systemctl state <inactive> for tor.service.');
+		// default stop at init
 		if (running) return this.stop();
 	}
 
@@ -30,8 +33,6 @@ export class TorControl {
 		return new Promise((resolve) => {
 			const cmd = 'systemctl status tor.service';
 			exec(cmd, (err, stdout, stderr) => {
-				if (!err) this.logger.log('Systemctl is running tor.service.');
-				if (err) this.logger.warn('Systemctl is inactive tor.service.');
 				resolve(err == null);
 			});
 		});
@@ -78,6 +79,7 @@ export class TorControl {
 	 * @returns false: failed execution
 	 */
 	async writeRules(rules: HiddenServiceIdentifier[]): Promise<boolean> {
+		const pathToTorrc: string = '/etc/tor/torrc';
 		return new Promise((resolve) => {
 			try {
 				// this.logger.log(rules);
