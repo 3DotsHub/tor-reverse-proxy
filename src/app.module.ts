@@ -1,15 +1,16 @@
 // MO
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { DockerModule } from './docker/docker.module';
 
 // APP
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppWorkflow } from './app.service';
+import { Docker } from './docker.client.service';
+import { DockerContainer } from './docker.container.service';
+import { DockerNetwork } from './docker.network.service';
+import { TorControl } from './tor.control.service';
 
 @Module({
-	imports: [ScheduleModule.forRoot(), DockerModule],
-	controllers: [AppController],
-	providers: [AppService],
+	imports: [ScheduleModule.forRoot()],
+	providers: [AppWorkflow, Docker, DockerContainer, DockerNetwork, TorControl],
 })
 export class AppModule {}

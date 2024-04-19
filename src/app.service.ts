@@ -1,57 +1,72 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
-import { Docker } from './docker/services/docker.client.service';
-import { DockerHelper } from './docker/services/docker.helper.service';
-
-const HiddenServiceKeywords = ['HIDDENSERVICE_PROFILE', 'HIDDENSERVICE_PORT'];
-type HiddenServiceIdentifier = {
-	hostname: string;
-	profile: string;
-	port: number;
-};
+import { DockerContainer } from './docker.container.service';
+import { TorControl } from './tor.control.service';
+import { HiddenServiceIdentifier } from './app.types';
+import { DockerNetwork } from './docker.network.service';
 
 @Injectable()
-export class AppService {
+export class AppWorkflow {
 	private readonly logger = new Logger(this.constructor.name);
-	private running: boolean = false;
+	private initing: boolean = true;
+	private running: boolean = true;
+	private counter: number = 0;
+	private prevDecodedList: HiddenServiceIdentifier[] = [];
 
-	constructor(private readonly dockerHelper: DockerHelper) {
+	constructor(
+		private readonly dockerContainer: DockerContainer,
+		private readonly dockerNetwork: DockerNetwork,
+		private readonly torControl: TorControl
+	) {
 		this.workflow();
 	}
 
-	@Interval(10 * 1000)
+	async init() {
+		await this.torControl.init();
+		await this.dockerNetwork.init();
+
+		this.initing = false;
+		this.running = false;
+	}
+
+	@Interval(parseInt(process.env.INTERVAL) || 5000)
 	async workflow() {
+		if (this.initing) await this.init();
 		if (this.running) return;
 		this.running = true;
+		this.counter += 1;
 
-		// Fetching all containers...
-		this.logger.log('Fetching all containers...');
-		const containers = await this.dockerHelper.listContainers();
+		try {
+			// Fetching all containers...
+			this.logger.log(`Scanning for valid containers... --namespace ${process.env.NAMESPACE || '<undefined>'}`);
+			const list: object[] = await this.dockerContainer.scan();
+			const decodedList: HiddenServiceIdentifier[] = this.dockerContainer.decodeScanToHiddenServiceIdentifier(list);
 
-		// do for each container
-		for (let i = 0; i < containers.length; i++) {
-			const inspect = await this.dockerHelper.inspectContainer(containers.at(i)['Id']);
-			const env: String[] = inspect['Config']['Env'];
-
-			// collect env
-			const envKeys = [];
-			const envVals = [];
-			for (let j = 0; j < env.length; j++) {
-				const [key, value] = env.at(j).split('=');
-				envKeys.push(key);
-				envVals.push(value);
+			// Check if list has not been updated
+			if (this.prevDecodedList == decodedList) {
+				this.logger.log(`Valid container list NOT updated. Entries: ${decodedList.length}`);
+				this.running = false;
+				return;
+			} else {
+				this.logger.log(`Valid container list updated. Entries: ${decodedList.length}`);
+				this.prevDecodedList = decodedList;
 			}
 
-			// verifiy keywords
-			const verifyHiddenServiceKeywords = envKeys.includes(HiddenServiceKeywords.at(0));
-			if (!verifyHiddenServiceKeywords) continue;
+			// Network start, dep. on namespace
+			const responseNetworkStart = await this.dockerNetwork.start();
 
-			// get names
-			const names: string[] = containers.at(i)['Names'];
+			// Write rules
+			const responseTorWriteRules = await this.torControl.writeRules(decodedList);
 
-			console.log(inspect);
+			// Tor start
+			const responseTorStart = await this.torControl.start();
+
+			// finalize workflow
+			this.running = false;
+		} catch (error) {
+			// finalize error
+			this.logger.error(error);
+			this.running = false;
 		}
-
-		this.running = false;
 	}
 }

@@ -1,16 +1,16 @@
 # select base image
-FROM ubuntu:latest
+FROM node:latest
 
 # install dependencies
 RUN apt-get update -qq 
-RUN apt-get install -yqq nano tor
+RUN apt-get install -yqq nano tor systemctl
 
 # copy support scripts
-COPY . /app
+# COPY . /app
 
 # tor routing
 EXPOSE 9050/tcp
 
 # finalize
-WORKDIR /root
-ENTRYPOINT ["tor"]
+WORKDIR /app
+# ENTRYPOINT ["npm run start:dev"]
