@@ -34,10 +34,10 @@ if you have docker desktop running, you can develop locally inside the container
 
 ```bash
 # run app with tor-reverse-proxy:0.0.1 image
-docker run -dit --rm --mount type=bind,source="$(pwd)",target=/app --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy tor-reverse-proxy:0.0.1 npm run start:dev
+docker run -dit --rm --mount type=bind,source="$(pwd)",target=/data --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy tor-reverse-proxy:0.0.1 npm run start:dev
 
 # or run app as node image and manually install deps, if neccessary
-ocker run -dit --rm --mount type=bind,source="$(pwd)",target=/app --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy node bash -c "cd /app && npm run start:dev"
+ocker run -dit --rm --mount type=bind,source="$(pwd)",target=/data --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy node bash -c "cd /data && npm run start:dev"
 docker exec -it <container-id> apt-get update -qq
 docker exec -it <container-id> apt-get install -yqq nano tor
 
