@@ -4,6 +4,7 @@ import { HiddenServiceKeywords, HiddenServiceIdentifier } from './app.types';
 
 @Injectable()
 export class DockerContainer {
+	private readonly logger = new Logger(this.constructor.name);
 	constructor(private docker: Docker) {}
 
 	async list(): Promise<[]> {
@@ -62,8 +63,15 @@ export class DockerContainer {
 		const decoded: HiddenServiceIdentifier[] = [];
 		for (let item of list) {
 			const env = this.decodeEnvKeyPairArray(item['Config']['Env']);
+			const net = item['NetworkSettings']['Networks'][env[HiddenServiceKeywords.namespace]];
+
+			if (!net) {
+				this.logger.warn('Not in overlay network');
+				continue;
+			}
+
 			decoded.push({
-				hostname: item['Config']['Hostname'],
+				hostname: item['NetworkSettings']['Networks'][env[HiddenServiceKeywords.namespace]]['IPAddress'],
 				profile: env[HiddenServiceKeywords.profile],
 				namespace: env[HiddenServiceKeywords.namespace],
 				port: parseInt(env[HiddenServiceKeywords.port]) || 80,

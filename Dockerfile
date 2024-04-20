@@ -5,12 +5,16 @@ FROM node:latest
 RUN apt-get update -qq 
 RUN apt-get install -yqq nano tor systemctl
 
-# copy support scripts
-# COPY . /app
+# mkdir
+RUN mkdir /data
+
+# clone and install
+RUN git clone https://github.com/3DotsHub/tor-reverse-proxy.git /data
+WORKDIR /data/tor-reverse-proxy
+RUN npm install
 
 # tor routing
 EXPOSE 9050/tcp
 
 # finalize
-WORKDIR /app
-# ENTRYPOINT ["npm run start:dev"]
+ENTRYPOINT ["npm run start:prod"]

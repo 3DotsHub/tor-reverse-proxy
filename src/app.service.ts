@@ -37,26 +37,45 @@ export class AppWorkflow {
 		this.counter += 1;
 
 		try {
-			// Fetching all containers...
+			// Fetching all containers
 			this.logger.log(`Scanning for valid containers... --namespace ${process.env.NAMESPACE || '<undefined>'}`);
 			const list: object[] = await this.dockerContainer.scan();
 			const decodedList: HiddenServiceIdentifier[] = this.dockerContainer.decodeScanToHiddenServiceIdentifier(list);
 
-			// Check if list has not been updated
-			if (JSON.stringify(this.prevDecodedList) == JSON.stringify(decodedList)) {
-				this.logger.log(`Validated container list NOT updated. Entries: ${decodedList.length}`);
+			// Check if list is empty
+			if (decodedList.length == 0) {
+				this.logger.log('No valid containers found.');
 				this.running = false;
 				return;
-			} else {
-				this.logger.log(`Validated container list updated. Entries: ${decodedList.length}`);
-				this.prevDecodedList = decodedList;
 			}
+
+			// Check if list has not been updated
+			if (JSON.stringify(this.prevDecodedList) == JSON.stringify(decodedList)) {
+				const responseTorStatus = await this.torControl.isRunning();
+				const responseTorRestart = !responseTorStatus && (await this.torControl.start());
+
+				this.logger.log(`No updates. Entries: ${decodedList.length}`);
+				this.logger.log(`Tor.running: ${responseTorStatus}, Tor.restart: ${responseTorRestart}`);
+
+				this.running = false;
+				return;
+			}
+
+			// log and update
+			this.prevDecodedList = decodedList;
+			this.logger.log(`Validated container list updated. Entries: ${decodedList.length}`);
+
+			// Tor stop
+			const responseTorStop = await this.torControl.stop();
+			this.logger.log(`Tor.stopped: ${responseTorStop}`);
 
 			// Write rules
 			const responseTorWriteRules = await this.torControl.writeRules(decodedList);
+			this.logger.log(`Tor.writeRules: ${responseTorWriteRules}`);
 
 			// Tor start
 			const responseTorStart = await this.torControl.start();
+			this.logger.log(`Tor.started: ${responseTorStart}`);
 
 			// finalize workflow
 			this.running = false;
