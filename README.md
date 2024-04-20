@@ -33,16 +33,16 @@ docker network create --driver overlay --attachable torreverseproxy
 if you have docker desktop running, you can develop locally inside the container.
 
 ```bash
-# run app
+# run app with tor-reverse-proxy:0.0.1 image
+docker run -dit --rm --mount type=bind,source="$(pwd)",target=/app --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy tor-reverse-proxy:0.0.1 npm run start:dev
+
+# or run app as node image and manually install deps, if neccessary
 ocker run -dit --rm --mount type=bind,source="$(pwd)",target=/app --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy node bash -c "cd /app && npm run start:dev"
-# manually install deps, if neccessary
 docker exec -it <container-id> apt-get update -qq
 docker exec -it <container-id> apt-get install -yqq nano tor
-# follow logs
-docker logs -f <container-id>
 
-# orrun app with tor-reverse-proxy:0.0.1 image
-docker run -dit --rm --mount type=bind,source="$(pwd)",target=/app --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy tor-reverse-proxy:0.0.1 npm run start:dev
+# follow logs
+docker logs -f --tail 1000 <container-id>
 
 # run clients
 docker run -dit --rm -e HIDDENSERVICE_PROFILE=alice -e HIDDENSERVICE_NAMESPACE=torreverseproxy --network torreverseproxy nginx
@@ -68,9 +68,13 @@ docker exec -it <tor-reverse-proxy-condainer-id> cat /var/lib/tor/<profile>/host
 # or print all *
 
 docker exec -it <tor-reverse-proxy-condainer-id> cat /var/lib/tor/*/hostname
+
+# or logs
+
+docker logs -f --tail 1000 <container-id>
 ```
 
-### Attach volumes to Tor container and/or services.
+### Attach volumes to Tor container and/or services, if needed.
 
 ```
 Config file

@@ -29,7 +29,7 @@ export class AppWorkflow {
 		this.running = false;
 	}
 
-	@Interval(parseInt(process.env.INTERVAL) || 5000)
+	@Interval(parseInt(process.env.INTERVAL) || 10000)
 	async workflow() {
 		if (this.initing) await this.init();
 		if (this.running) return;
