@@ -1,0 +1,20 @@
+version: '3.5'
+
+volumes:
+    profiles:
+
+networks:
+    torreverseproxy:
+        name: torreverseproxy
+        external: true
+
+services:
+    app:
+        image: tor-reverse-proxy:0.0.1
+        environment:
+            - NAMESPACE=torreverseproxy
+        volumes:
+            - profiles:/var/lib/tor/
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        networks:
+            - torreverseproxy

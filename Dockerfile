@@ -1,20 +1,23 @@
 # select base image
-FROM node:latest
+FROM node:21
 
 # install dependencies
-RUN apt-get update -qq 
-RUN apt-get install -yqq nano tor systemctl
+RUN apt-get update -qq
+RUN apt-get install -yqq nano tor
 
 # mkdir
 RUN mkdir /data
 
 # clone and install
 RUN git clone https://github.com/3DotsHub/tor-reverse-proxy.git /data
-WORKDIR /data/tor-reverse-proxy
+
+# install and build
+WORKDIR /data
 RUN npm install
+RUN npm run build
 
 # tor routing
 EXPOSE 9050/tcp
 
 # finalize
-ENTRYPOINT ["npm run start:prod"]
+CMD ["npm", "run", "start:prod"]
