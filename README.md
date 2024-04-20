@@ -88,13 +88,89 @@ Profiles dir
 
 Check out "Environment" folder for examples.
 
+## Tor Reverse Proxy APP
+
 ### Volume for profiles
 
 ```bash
 # example to persist profiles in docker
 volumes:
-	- profiles:/var/lib/tor/
-	- /var/run/docker.sock:/var/run/docker.sock:ro
+    profiles:
+
+...
+...
+...
+		volumes:
+			- profiles:/var/lib/tor/
+			- /var/run/docker.sock:/var/run/docker.sock:ro
+```
+
+### Network
+
+```bash
+networks:
+    torreverseproxy:
+        name: torreverseproxy
+        external: true
+```
+
+### Service
+
+```bash
+services:
+    app:
+        image: tor-reverse-proxy:0.0.1
+        environment:
+            - NAMESPACE=torreverseproxy
+			...
+			...
+        volumes:
+            - profiles:/var/lib/tor/
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        networks:
+            - torreverseproxy
+```
+
+## Other external service (clients)
+
+### HIDDENSERVICE Keywords
+
+-   HIDDENSERVICE_PROFILE, default: takes container hostname
+-   HIDDENSERVICE_NAMESPACE, default: torreverseproxy
+-   HIDDENSERVICE_PORT, default: 80
+
+### Service
+
+```bash
+services:
+    alice:
+        image: nginx
+        environment:
+            - HIDDENSERVICE_PROFILE=alice
+            - HIDDENSERVICE_NAMESPACE=torreverseproxy
+            - HIDDENSERVICE_PORT=80
+        networks:
+            - torreverseproxy
+
+    bob:
+        image: nginx
+        environment:
+            - HIDDENSERVICE_PROFILE=bob
+            - HIDDENSERVICE_NAMESPACE=torreverseproxy
+        networks:
+            - torreverseproxy
+
+    charlie:
+        image: nginx
+        environment:
+            - HIDDENSERVICE_PROFILE=charlie
+        networks:
+            - torreverseproxy
+
+    fox:
+        image: nginx
+        networks:
+            - torreverseproxy
 ```
 
 ### Deploying stacks and services

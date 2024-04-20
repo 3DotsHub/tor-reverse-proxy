@@ -74,7 +74,7 @@ export class DockerContainer {
 			decoded.push({
 				hostname: hn,
 				ipaddress: item['NetworkSettings']['Networks'][env[HiddenServiceKeywords.namespace]]['IPAddress'],
-				profile: env[HiddenServiceKeywords.profile],
+				profile: env[HiddenServiceKeywords.profile] || hn,
 				namespace: env[HiddenServiceKeywords.namespace],
 				port: parseInt(env[HiddenServiceKeywords.port]) || 80,
 			});
