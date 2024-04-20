@@ -76,7 +76,7 @@ export class TorControl {
 			const cmd = `cat /var/lib/tor/${name}/hostname`;
 			exec(cmd, (err, stdout, stderr) => {
 				if (err) resolve('');
-				else resolve(stdout.slice(0, -2));
+				else resolve(stdout.slice(0, -1));
 			});
 		});
 	}
