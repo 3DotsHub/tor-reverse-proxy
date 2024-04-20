@@ -18,6 +18,7 @@ NAMESPACE=torreverseproxy
 
 ```bash
 docker build --tag tor-reverse-proxy:0.0.1 .
+docker build --tag tor-reverse-proxy:0.0.1 --no-cache .
 ```
 
 ### Create attachable swarm overlay network
@@ -103,4 +104,34 @@ docker stack deploy -c Environment/tor-reverse-proxy.yml tor-reverse-proxy
 
 # nginx-clients.yml deploys 3 nginx services for reverse proxy testing
 docker stack deploy -c Environment/nginx-clients.yml nginx-clients
+```
+
+## tor-reverse-proxy APP Example Output
+
+```bash
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [NestFactory] Starting Nest application...
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [InstanceLoader] DiscoveryModule dependencies initialized +39ms
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [InstanceLoader] AppModule dependencies initialized +0ms
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [InstanceLoader] ScheduleModule dependencies initialized +0ms
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [NestApplication] Nest application successfully started +25ms
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [TorControl] Tor service running: false
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [AppWorkflow] Scanning for valid containers... --namespace torreverseproxy
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [AppWorkflow] Validated container list updated. Entries: 3
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [TorControl] Tor service stopped.
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [AppWorkflow] Tor.stopped: true
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [TorControl] Applying rule in behalf of ab0090b1d06e for charlie at 10.0.20.51:80
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [TorControl] Applying rule in behalf of 128dee7c0248 for bob at 10.0.20.49:80
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [TorControl] Applying rule in behalf of 6561a8b157a8 for alice at 10.0.20.47:80
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [TorControl] Writing rules successful.
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [AppWorkflow] Tor.writeRules: true
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [TorControl] Tor service started.
+[Nest] 19  - 04/20/2024, 11:05:37 AM     LOG [AppWorkflow] Tor.started: true
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [AppWorkflow] Scanning for valid containers... --namespace torreverseproxy
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [AppWorkflow] Tor.running: true, Tor.restart: false
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [TorControl] Applied rule in behalf of ab0090b1d06e for charlie at 10.0.20.51:80
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [TorControl] Profile charlie at is6qe4fxxxxxxxxxxxxxxxxxxxxxxerggxeqzyd.onion
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [TorControl] Applied rule in behalf of 128dee7c0248 for bob at 10.0.20.49:80
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [TorControl] Profile bob at oghrynqkwwddddddddddddddddddd6peyt3xfusq54biumqd.onion
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [TorControl] Applied rule in behalf of 6561a8b157a8 for alice at 10.0.20.47:80
+[Nest] 19  - 04/20/2024, 11:05:42 AM     LOG [TorControl] Profile alice at 5ev75jltggggggggggggggggggggglvmcbhr4xpr4cgzb4yd.onion
 ```
