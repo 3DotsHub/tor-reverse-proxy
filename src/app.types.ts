@@ -3,6 +3,7 @@ export const HiddenServiceKeywords = { profile: 'HIDDENSERVICE_PROFILE', port: '
 export type HiddenServiceIdentifier = {
 	profile: string;
 	hostname: string;
+	ipaddress: string;
 	namespace?: string;
 	port?: number;
 };

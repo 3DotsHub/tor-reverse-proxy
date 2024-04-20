@@ -84,11 +84,11 @@ export class TorControl {
 		return new Promise((resolve) => {
 			try {
 				for (let rule of rules) {
-					this.logger.log(`Applying rule for ${rule.profile} at ${rule.hostname}:${rule.port}`);
+					this.logger.log(`Applying rule in behalf of ${rule.hostname} for ${rule.profile} at ${rule.ipaddress}:${rule.port}`);
 
 					exportToFile += `##### HiddenService for ${rule.profile} #####\n`;
 					exportToFile += `HiddenServiceDir /var/lib/tor/${rule.profile}/\n`;
-					exportToFile += `HiddenServicePort 80 ${rule.hostname}:${rule.port}\n`;
+					exportToFile += `HiddenServicePort 80 ${rule.ipaddress}:${rule.port}\n`;
 					exportToFile += `\n`;
 				}
 

@@ -64,6 +64,7 @@ export class DockerContainer {
 		for (let item of list) {
 			const env = this.decodeEnvKeyPairArray(item['Config']['Env']);
 			const net = item['NetworkSettings']['Networks'][env[HiddenServiceKeywords.namespace]];
+			const hn = item['Config']['Hostname'];
 
 			if (!net) {
 				this.logger.warn('Not in overlay network');
@@ -71,7 +72,8 @@ export class DockerContainer {
 			}
 
 			decoded.push({
-				hostname: item['NetworkSettings']['Networks'][env[HiddenServiceKeywords.namespace]]['IPAddress'],
+				hostname: hn,
+				ipaddress: item['NetworkSettings']['Networks'][env[HiddenServiceKeywords.namespace]]['IPAddress'],
 				profile: env[HiddenServiceKeywords.profile],
 				namespace: env[HiddenServiceKeywords.namespace],
 				port: parseInt(env[HiddenServiceKeywords.port]) || 80,
