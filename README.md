@@ -27,6 +27,28 @@ docker build --tag tor-reverse-proxy:0.0.1 .
 docker network create --driver overlay --attachable torreverseproxy
 ```
 
+### Develop application inside the container
+
+if you have docker desktop running, you can develop locally inside the container.
+
+```bash
+# run app
+ocker run -dit --rm --mount type=bind,source="$(pwd)",target=/app --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy node bash -c "cd /app && npm run start:dev"
+# manually install deps, if neccessary
+docker exec -it <container-id> apt-get update -qq
+docker exec -it <container-id> apt-get install -yqq nano tor
+# follow logs
+docker logs -f <container-id>
+
+# orrun app with tor-reverse-proxy:0.0.1 image
+docker run -dit --rm --mount type=bind,source="$(pwd)",target=/app --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --network torreverseproxy tor-reverse-proxy:0.0.1 npm run start:dev
+
+# run clients
+docker run -dit --rm -e HIDDENSERVICE_PROFILE=alice -e HIDDENSERVICE_NAMESPACE=torreverseproxy --network torreverseproxy nginx
+docker run -dit --rm -e HIDDENSERVICE_PROFILE=bob -e HIDDENSERVICE_NAMESPACE=torreverseproxy --network torreverseproxy nginx
+docker run -dit --rm -e HIDDENSERVICE_PROFILE=charlie -e HIDDENSERVICE_NAMESPACE=torreverseproxy --network torreverseproxy nginx
+```
+
 ### Run application
 
 ```bash

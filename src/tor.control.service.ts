@@ -32,7 +32,7 @@ export class TorControl {
 		return new Promise((resolve) => {
 			const cmd = 'service tor status';
 			exec(cmd, (err, stdout, stderr) => {
-				resolve(stdout != 'tor is not running ... failed!\n');
+				resolve(stdout.search('failed') == -1);
 			});
 		});
 	}
@@ -62,11 +62,21 @@ export class TorControl {
 	 */
 	async stop(): Promise<boolean> {
 		return new Promise((resolve) => {
-			const cmd = 'killall tor';
+			const cmd = 'service tor stop';
 			exec(cmd, (err, stdout, stderr) => {
 				if (!err) this.logger.log('Tor service stopped.');
 				if (err) this.logger.error('Tor service failed to stop.');
 				resolve(err == null);
+			});
+		});
+	}
+
+	async getProfileHostname(name: string): Promise<string> {
+		return new Promise((resolve) => {
+			const cmd = `cat /var/lib/tor/${name}/hostname`;
+			exec(cmd, (err, stdout, stderr) => {
+				if (err) resolve('');
+				else resolve(stdout);
 			});
 		});
 	}
@@ -101,5 +111,19 @@ export class TorControl {
 				resolve(false);
 			}
 		});
+	}
+
+	/**
+	 *
+	 * @returns EXECUTION STATE
+	 * @returns true: successful execution
+	 * @returns false: failed execution
+	 */
+	async displayRules(rules: HiddenServiceIdentifier[]) {
+		for (let rule of rules) {
+			const profileHostname = await this.getProfileHostname(rule.profile);
+			this.logger.log(`Applied rule in behalf of ${rule.hostname} for ${rule.profile} at ${rule.ipaddress}:${rule.port}`);
+			this.logger.log(`Profile ${rule.profile} at ${profileHostname}`);
+		}
 	}
 }

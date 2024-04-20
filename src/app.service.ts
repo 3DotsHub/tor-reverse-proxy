@@ -44,7 +44,10 @@ export class AppWorkflow {
 
 			// Check if list is empty
 			if (decodedList.length == 0) {
-				this.logger.log('No valid containers found.');
+				const responseTorStatus = await this.torControl.isRunning();
+				const responseTorStop = responseTorStatus && (await this.torControl.stop());
+
+				this.logger.log(`No valid containers. Tor.running: ${responseTorStatus}, Tor.stop: ${responseTorStop}`);
 				this.running = false;
 				return;
 			}
@@ -54,8 +57,8 @@ export class AppWorkflow {
 				const responseTorStatus = await this.torControl.isRunning();
 				const responseTorRestart = !responseTorStatus && (await this.torControl.start());
 
-				this.logger.log(`No updates. Entries: ${decodedList.length}`);
 				this.logger.log(`Tor.running: ${responseTorStatus}, Tor.restart: ${responseTorRestart}`);
+				this.torControl.displayRules(decodedList);
 
 				this.running = false;
 				return;
