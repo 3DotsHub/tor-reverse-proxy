@@ -39,7 +39,7 @@ export class DockerContainer {
 			if (!env[HiddenServiceKeywords.profile]) continue;
 
 			// verify namespace keyword, if available
-			const processNamespace: string = process.env.NAMESPACE;
+			const processNamespace: string = process.env.NAMESPACE || 'torreverseproxy';
 			if (processNamespace && env[HiddenServiceKeywords.namespace] != processNamespace) continue;
 
 			// push

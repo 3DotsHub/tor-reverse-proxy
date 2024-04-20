@@ -38,7 +38,7 @@ export class AppWorkflow {
 
 		try {
 			// Fetching all containers
-			this.logger.log(`Scanning for valid containers... --namespace ${process.env.NAMESPACE || '<undefined>'}`);
+			this.logger.log(`Scanning for valid containers... --namespace ${process.env.NAMESPACE || 'torreverseproxy'}`);
 			const list: object[] = await this.dockerContainer.scan();
 			const decodedList: HiddenServiceIdentifier[] = this.dockerContainer.decodeScanToHiddenServiceIdentifier(list);
 
