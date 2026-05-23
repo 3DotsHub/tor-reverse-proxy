@@ -94,11 +94,11 @@ export class TorControl {
 		return new Promise((resolve) => {
 			try {
 				for (let rule of rules) {
-					this.logger.log(`Applying rule in behalf of ${rule.hostname} for ${rule.profile} at ${rule.ipaddress}:${rule.port}`);
+					this.logger.log(`Applying rule on behalf of ${rule.hostname}:${rule.port} for profile ${rule.profile}`);
 
-					exportToFile += `##### HiddenService for ${rule.profile} #####\n`;
+					exportToFile += `##### HiddenService for ${rule.hostname} #####\n`;
 					exportToFile += `HiddenServiceDir /var/lib/tor/${rule.profile}/\n`;
-					exportToFile += `HiddenServicePort 80 ${rule.ipaddress}:${rule.port}\n`;
+					exportToFile += `HiddenServicePort 80 ${rule.hostname}:${rule.port}\n`;
 					exportToFile += `\n`;
 				}
 
@@ -122,7 +122,7 @@ export class TorControl {
 	async displayRules(rules: HiddenServiceIdentifier[]) {
 		for (let rule of rules) {
 			const profileHostname = await this.getProfileHostname(rule.profile);
-			this.logger.log(`Applied rule in behalf of ${rule.hostname} for ${rule.profile} at ${rule.ipaddress}:${rule.port}`);
+			this.logger.log(`Applied rule on behalf of ${rule.hostname}:${rule.port} for profile ${rule.profile}`);
 			this.logger.log(`Profile ${rule.profile} at ${profileHostname}`);
 		}
 	}
